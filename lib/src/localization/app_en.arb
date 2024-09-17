@@ -1,0 +1,6 @@
+{
+  "appTitle": "rel_ex_interface",
+  "@appTitle": {
+    "description": "The title of the application"
+  }
+}

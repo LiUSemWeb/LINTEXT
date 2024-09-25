@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rel_ex_interface/src/util/const.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
 import 'package:rel_ex_interface/src/views/relationview.dart';
 import 'package:rel_ex_interface/src/views/tokenview.dart';
@@ -99,7 +100,7 @@ class _MainPageViewState extends State<MainPageView>
     // print(body);
 
     try {
-      var response = await http.post(Uri.parse('http://localhost:13679/'),
+      var response = await http.post(Uri.parse('$serverUrl:$port'),
           body: json.encode(body),
           headers: {
             'Accept': 'application/json',

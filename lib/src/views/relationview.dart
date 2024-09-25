@@ -433,6 +433,19 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
           maintainState: false,
           title: Row(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Checkbox(
+                  value: false,
+                  onChanged: (e) => {
+                    setState(() {
+                      // fetchSchema = !fetchSchema;
+                    })
+                  },
+                  visualDensity: const VisualDensity(
+                      horizontal: VisualDensity.minimumDensity),
+                ),
+              ),
               Text(widget.schemaJson[index]['name']),
               IconButton(
                 onPressed: () {

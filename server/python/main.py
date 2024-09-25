@@ -28,6 +28,10 @@ from typing import Dict, Any
 
 from transformers import AutoTokenizer
 
+# __def_model = 'bert-large-uncased'
+# __def_model = 'dmis-lab/biobert-large-cased-v1.1'
+__def_model = 'Charangan/MedBERT'
+
 
 class CustomJSONResponse(JSONResponse):
     media_type = "application/json; charset=utf-8"
@@ -40,7 +44,7 @@ tokenizer:AutoTokenizer = None
 
 fb = None
 
-def getBERT(model_name:str='bert-large-cased'):
+def getBERT(model_name:str=__def_model):
     global fb
     if fb is None or fb.model_name != model_name:
         # model_name = 'bert-large-cased'
@@ -125,7 +129,7 @@ def getRelInfo(dataset):
 def error(text):
     return {'error': text}
 
-def analyze(text='', schema={}, dataset='', doc=-1, subset='', model='bert-large-uncased', **kwargs):
+def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, **kwargs):
     if not schema:
         return error('Schema must include at least one relation.')
     if doc > -1:

@@ -145,6 +145,21 @@ class _MainPageViewState extends State<MainPageView>
           ],
         ),
       ),
+      floatingActionButton: SizedBox(
+        height: 32,
+        width: 32,
+        child: FloatingActionButton(
+          backgroundColor: Colors.blue,
+          // tooltip: 'Increment',
+
+          onPressed: () {},
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
+      ),
       body: Row(
         children: [
           Expanded(

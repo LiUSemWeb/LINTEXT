@@ -295,7 +295,7 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
       if (saveLoc != null) {
         await File(saveLoc).writeAsString(jsonEncode(<String, dynamic>{
           for (JSONObject v in widget.schemaJson)
-            v['rel_id']: v..remove('rel_id')
+            v['rel_id']: v..remove('rel_id')..remove('checked')
         }));
       }
     } else {
@@ -312,8 +312,9 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
     // _data.clear();
     // widget.schemaJson = json;
     _expandies.clear();
-    for (JSONObject _ in widget.schemaJson) {
+    for (JSONObject j in widget.schemaJson) {
       // _data.add(SchemaItem.fromJson(relJson));
+      j['checked'] = false;
       _expandies.add(ExpansionTileController());
     }
   }
@@ -338,7 +339,7 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
   JSONList convertDefaultSchemaJSON(JSONObject oldJson) {
     JSONList newJson = [];
     for (String key in oldJson.keys) {
-      newJson.add(oldJson[key] as JSONObject..putIfAbsent('rel_id', () => key));
+      newJson.add(oldJson[key] as JSONObject..putIfAbsent('rel_id', () => key)..putIfAbsent('checked', () => false));
     }
     return newJson;
   }
@@ -436,10 +437,10 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Checkbox(
-                  value: false,
+                  value: widget.schemaJson[index]['checked'],
                   onChanged: (e) => {
                     setState(() {
-                      // fetchSchema = !fetchSchema;
+                      widget.schemaJson[index]['checked'] = !widget.schemaJson[index]['checked'];
                     })
                   },
                   visualDensity: const VisualDensity(

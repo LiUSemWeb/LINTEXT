@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rel_ex_interface/src/util/const.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
+import 'package:rel_ex_interface/src/views/analyzeview.dart';
 import 'package:rel_ex_interface/src/views/relationview.dart';
 import 'package:rel_ex_interface/src/views/tokenview.dart';
 
@@ -48,6 +49,22 @@ enum Schema {
   const Schema(this.label, this.dir);
   final String label;
   final String dir;
+}
+
+Future<JSONObject> sendRequestToServer(body) async {
+  try {
+    var response = await http.post(Uri.parse('$serverUrl:$port'),
+        body: json.encode(body),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        });
+    return json.decode(response.body);
+  } catch (e) {
+    print("Error connecting to the server: $e");
+  }
+  return {};
+  // print(tokensJson);
 }
 
 class _MainPageViewState extends State<MainPageView>
@@ -96,34 +113,29 @@ class _MainPageViewState extends State<MainPageView>
       };
       body['schema'] = fetchSchema;
     }
-
-    // print(body);
-
-    try {
-      var response = await http.post(Uri.parse('$serverUrl:$port'),
-          body: json.encode(body),
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          });
-      setState(() {
-        try {
-          tokensJson = json.decode(response.body);
-          if (tokensJson.containsKey('schema')) {
-            schemaJson = tokensJson['schema'];
-          }
-          // print("schemaJson: $schemaJson");
-        } catch (e) {
-          print('Big whoops $e');
+    tokensJson = await sendRequestToServer(body);
+    setState(() {
+      try {
+        if (tokensJson.containsKey('schema')) {
+          schemaJson = tokensJson['schema'];
         }
-      });
-    } catch (e) {
-      print("Error connecting to the server: $e");
-    }
+        TokensView.resetColors();
+        // print("schemaJson: $schemaJson");
+      } catch (e) {
+        print('Big whoops $e');
+      }
+    });
+  }
 
-    TokensView.resetColors();
-
-    // print(tokensJson);
+  Future<void> doAnalyze(JSONList schema) async {
+    JSONObject formattedSchema = {for (JSONObject v in schema) if(v['checked']) v['rel_id']: Map.from(v)..remove('rel_id')};
+    print("DoAnalyze");
+    JSONObject r = await sendRequestToServer({
+      // text='', schema={}, dataset='', doc=-1, subset='', model=__def_model,
+      'method': 'analyze',
+      'body': {'text':'', 'schema':formattedSchema, 'dataset': datasetController.text, 'subset': subsetController.text, 'doc':int.parse(docnumController.text), 'model':'bert-large-uncased'} as JSONObject,
+    });
+    print(r);
   }
 
   @override
@@ -268,7 +280,7 @@ class _MainPageViewState extends State<MainPageView>
                           dense: true,
                           contentPadding:
                               const EdgeInsets.only(left: 8.0, right: 0),
-                          visualDensity: VisualDensity(
+                          visualDensity: const VisualDensity(
                               horizontal: VisualDensity.minimumDensity),
                         ),
                       ),
@@ -328,7 +340,7 @@ class _MainPageViewState extends State<MainPageView>
                           })
                         },
                       ),
-                      Text('Empty'),
+                      AnalyzeView(callback: () => doAnalyze(schemaJson) ),
                       // Text('Emptier')
                     ],
                   ),

@@ -84,7 +84,7 @@ def run_exp(fb:FitBert = None, resdir='res/', task_name='docred', dset='dev', do
         processed_docs = []
         tot = 1000 if dset == 'dev' else 3053
         d: Document = ...  # Silly way to get some IDEs to give better completions.
-        for d in Document.read_document(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path='data', use_ent=use_ent):
+        for d in Document.read(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path='data', use_ent=use_ent):
             # docfile = f"{resdir}/{task_name}_{model.model_name}_{dset}_{d.num}_{num_blanks}b_{num_passes}p.pickle"
             # docfile = f"{resdir}/{(task_name + '_') if task_name != 'docred' else ''}{(model + '_') if model != 'bert-large-cased' else ''}{dset}_{d.num}{'_' + str(num_blanks) + 'blanks' if num_blanks != 2 else ''}{'' if use_ent else '_MASK'}{'' if num_passes == 1 else '_'+str(num_passes)}.pickle"
             # print(docfile)

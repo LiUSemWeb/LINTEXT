@@ -193,8 +193,7 @@ def run_many_experiments(task_name, dset, rel_info, nonlins, poolers, scorers, n
         poolers = [None]
     with torch.no_grad():
         torch.cuda.empty_cache()
-        if not model:
-            fb = FitBert()
+        fb = model or FitBert()
         fb = fb.extend_bert(50, num_blanks)
         model_name = model.model_name.split('/')[-1]
         # nls = {None: lambda x:x, "softmax": FitBert.softmax, "relu":torch.relu}

@@ -28,9 +28,9 @@ from typing import Dict, Any
 
 from transformers import AutoTokenizer
 
-# __def_model = 'bert-large-uncased'
+__def_model = 'bert-large-uncased'
 # __def_model = 'dmis-lab/biobert-large-cased-v1.1'
-__def_model = 'Charangan/MedBERT'
+# __def_model = 'Charangan/MedBERT'
 
 
 class CustomJSONResponse(JSONResponse):
@@ -185,7 +185,7 @@ async def respond_post(data: Request) -> Dict[str, Any]:
                 out_json['tokens'].append({'text': token, 'type': str(i) if i >= 0 else '', 'ent': i, 'ment': i})
         elif method == 'analyze':
 
-            out_json['results'] = analyze(**in_json)
+            out_json['results'] = analyze(**body)
     except json.decoder.JSONDecodeError:
         print(f"[ERROR] Received an unexpected POST request:\n{data}")
 

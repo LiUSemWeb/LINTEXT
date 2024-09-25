@@ -23,6 +23,8 @@ class TokensView extends StatelessWidget {
 
   static List<TokensView> fromJson(JSONObject json) {
     // print(json);
+    if(json.isEmpty || !json.containsKey('tokens')) return [];
+
     List<TokensView> outList = [];
     for (JSONObject token in json['tokens']) {
       String text = token['text'];
@@ -66,6 +68,7 @@ class TokensView extends StatelessWidget {
 
   static Set<String> typeListFromJson(JSONObject json) {
     Set<String> types = {};
+    if(json.isEmpty || !json.containsKey('tokens')) return types;
     for (JSONObject token in json['tokens']) {
       types.add(token['type']);
     }

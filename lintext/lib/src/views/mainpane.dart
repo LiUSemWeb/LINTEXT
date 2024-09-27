@@ -80,6 +80,7 @@ class _MainPageViewState extends State<MainPageView>
   // IconLabel? selectedIcon;
   JSONObject tokensJson = {'tokens': []};
   bool fetchSchema = true;
+  List<dynamic> rankList = [];
 
   final ss = SharedState();
 
@@ -128,14 +129,27 @@ class _MainPageViewState extends State<MainPageView>
   }
 
   Future<void> doAnalyze(JSONList schema) async {
-    JSONObject formattedSchema = {for (JSONObject v in schema) if(v['checked']) v['rel_id']: Map.from(v)..remove('rel_id')};
+    JSONObject formattedSchema = {
+      for (JSONObject v in schema)
+        if (v['checked']) v['rel_id']: Map.from(v)..remove('rel_id')
+    };
     print("DoAnalyze");
     JSONObject r = await sendRequestToServer({
       // text='', schema={}, dataset='', doc=-1, subset='', model=__def_model,
       'method': 'analyze',
-      'body': {'text':'', 'schema':formattedSchema, 'dataset': datasetController.text, 'subset': subsetController.text, 'doc':int.parse(docnumController.text), 'model':'bert-large-uncased'} as JSONObject,
+      'body': {
+        'text': '',
+        'schema': formattedSchema,
+        'dataset': datasetController.text,
+        'subset': subsetController.text,
+        'doc': int.parse(docnumController.text),
+        'model': 'bert-large-uncased'
+      } as JSONObject,
     });
-    print(r);
+    print("We got $r");
+    setState(() {
+      rankList = r['results'];
+    });
   }
 
   @override
@@ -340,7 +354,11 @@ class _MainPageViewState extends State<MainPageView>
                           })
                         },
                       ),
-                      AnalyzeView(callback: () => doAnalyze(schemaJson) ),
+                      AnalyzeView(
+                        callback: () => doAnalyze(schemaJson),
+                        rankList: rankList,
+                        schemaJson: schemaJson,
+                      ),
                       // Text('Emptier')
                     ],
                   ),

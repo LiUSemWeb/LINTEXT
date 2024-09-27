@@ -92,8 +92,6 @@ class _SchemaItemState extends State<SchemaItem> {
   @override
   void initState() {
     // print("schemaJSON: ${widget.schemaJson}");
-    // TODO: Set default value here by making a method and
-    // using case-based logic around the variable type.
     controllers = widget.json.map(
         (k, v) => MapEntry(k, TextEditingController(text: getInitialValue(k))));
     super.initState();
@@ -295,7 +293,9 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
       if (saveLoc != null) {
         await File(saveLoc).writeAsString(jsonEncode(<String, dynamic>{
           for (JSONObject v in widget.schemaJson)
-            v['rel_id']: v..remove('rel_id')..remove('checked')
+            v['rel_id']: v
+              ..remove('rel_id')
+              ..remove('checked')
         }));
       }
     } else {
@@ -339,7 +339,9 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
   JSONList convertDefaultSchemaJSON(JSONObject oldJson) {
     JSONList newJson = [];
     for (String key in oldJson.keys) {
-      newJson.add(oldJson[key] as JSONObject..putIfAbsent('rel_id', () => key)..putIfAbsent('checked', () => false));
+      newJson.add(oldJson[key] as JSONObject
+        ..putIfAbsent('rel_id', () => key)
+        ..putIfAbsent('checked', () => false));
     }
     return newJson;
   }
@@ -440,7 +442,8 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
                   value: widget.schemaJson[index]['checked'],
                   onChanged: (e) => {
                     setState(() {
-                      widget.schemaJson[index]['checked'] = !widget.schemaJson[index]['checked'];
+                      widget.schemaJson[index]['checked'] =
+                          !widget.schemaJson[index]['checked'];
                     })
                   },
                   visualDensity: const VisualDensity(

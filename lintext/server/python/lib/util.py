@@ -330,7 +330,7 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                                     if scorer.label == "pll":
                                         # Then make the index from its parts, same as the other thing.
                                         origids = replace_ids(ev_tkns[m1], ev_tkns[m2], prompt_data[prompt_id])[1:-1].to(fb.device)
-                                    all_scores[prompt_id][scorer.label].append((e1, e2, m1, m2, ev_tkns[m1], ev_tkns[m2], (e1, e2) in ans, scorer(s, origids=origids)))
+                                    all_scores[prompt_id][scorer.label].append((e1, e2, m1, m2, ev_tkns[m1], ev_tkns[m2], (e1, e2) in ans, origids.cpu(), *scorer(s, origids=origids, return_all=True)))
                             all_labels = all_labels[_sentences_per_batch:]
                             # print(f"Document {p_doc.num} Tick.", flush=True)
                             # for scorer in scorers:

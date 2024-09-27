@@ -155,15 +155,16 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                     # tensor([16736,  1011, 14447, 14671]), True, -12.33619499206543)
                     lis_b.extend(lis_a[rel][scorer])
                 lis_c = []
-                for r in sorted(lis_b, key=lambda x: -x[-1]):
-                    e1, e2, m1, m2, i1, i2, truth, score = r
+                for r in sorted(lis_b, key=lambda x: -x[-2]):
+                    e1, e2, m1, m2, i1, i2, truth, tokens, score, allscores = r
                     if (e1, e2) not in seen:
-                        t1 = fb.tokenizer.convert_ids_to_tokens(i1)
-                        t2 = fb.tokenizer.convert_ids_to_tokens(i2)
+                        # t1 = fb.tokenizer.convert_ids_to_tokens(i1)
+                        # t2 = fb.tokenizer.convert_ids_to_tokens(i2)
+                        statement = " ".join(fb.tokenizer.convert_ids_to_tokens(tokens))
 
-                        statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
+                        # statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
                         # seen.add((e1, e2))
-                        lis_c.append([e1, e2, m1, m2, t1, t2, statement, truth, score])
+                        lis_c.append([e1, e2, m1, m2, statement, truth, allscores, score])
                 return lis_c
             else:
                 return error(f'Unknown MLM model name: f{model}')

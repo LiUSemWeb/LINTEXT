@@ -129,7 +129,8 @@ def getRelInfo(dataset):
 def error(text):
     return {'error': text}
 
-def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, **kwargs):
+def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', **kwargs):
+    print(f"Shall we work?\n{dataset}_{subset} {doc} {model}\n{schema}")
     if not schema:
         return error('Schema must include at least one relation.')
     if doc > -1:
@@ -138,12 +139,32 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
         elif not subset:
             error(f'Must specify subset of the dataset if specifying document number ({doc=})')
         else:
+            # return error('No more work.')
+            # print('after')
             fb = getBERT(model)
             if fb:
-                res = run_many_experiments(task_name=dataset, dset=subset, rel_info=schema, nonlins=[None],
-                                    poolers=[None], scorers=['pll'], num_blanks=0, num_passes=1, docnum=doc,
-                                    max_batch=1000, model=fb)
-                print(res)
+                res = run_many_experiments(task_name=dataset.lower(), dset=subset.lower(), rel_info=schema, nonlin=nonlin,
+                                    pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=0, num_passes=1, docnum=doc,
+                                    max_batch=1000, model=fb, data_path=data_path)
+                print("RESULTS:")
+                lis_a = res[doc]
+                lis_b = []
+                seen = set()
+                for rel in lis_a:
+                    # (3, 2, 0, 1, tensor([2002, 4502, 3406, 5666, 2618, 4517, 5387, 1006, 1044, 2078, 2546, 1007, 1011, 1020]),
+                    # tensor([16736,  1011, 14447, 14671]), True, -12.33619499206543)
+                    lis_b.extend(lis_a[rel][scorer])
+                lis_c = []
+                for r in sorted(lis_b, key=lambda x: -x[-1]):
+                    e1, e2, m1, m2, i1, i2, truth, score = r
+                    if (e1, e2) not in seen:
+                        t1 = fb.tokenizer.convert_ids_to_tokens(i1)
+                        t2 = fb.tokenizer.convert_ids_to_tokens(i2)
+
+                        statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
+                        # seen.add((e1, e2))
+                        lis_c.append([e1, e2, m1, m2, t1, t2, statement, truth, score])
+                return lis_c
             else:
                 return error(f'Unknown MLM model name: f{model}')
             pass
@@ -152,7 +173,7 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
     else:
         return error('Text-only mode not yet implemented.')
         # pass
-    
+    return error("Well that didn't go well.")
     { 'text': ...,  # raw text of the document, before tokenization
       'schema': ...,  # full schema to be applied. all relations will be analyzed.
       'dataset': ...,  # If applicable, name of the dataset (docred, biored, etc.)
@@ -191,6 +212,7 @@ async def respond_post(data: Request) -> Dict[str, Any]:
 
     return out_json
 
+# Parse command-line arguments
 parser = argparse.ArgumentParser(description='Starts a server for parsing text and doing relation extraction.')
 parser.add_argument("-p", "--port", type=int, default=13679)
 parser.add_argument('-v', '--verbose', action='store_true', default=False)
@@ -203,7 +225,6 @@ data_path = args.data
 # print(__name__)
 
 if __name__ == '__main__':
-    # Parse command-line arguments
 
     print(f"Spinning up the server on port {args.port}!")
     # Spin up the HTTPS server
@@ -218,3 +239,30 @@ if __name__ == '__main__':
         log_level='warning')
 elif __name__ == 'main': # Uvicorn main
     getBERT()
+#     analyze(text='', schema={
+#   "Association": {
+#     "name": "Association",
+#     "desc": "",
+#     "prompt_xy": "There is an association between ?x and ?y.",
+#     "prompt_yx": "There is an association between ?y and ?x.",
+#     "domain": [
+#       "ChemicalEntity",
+#       "GeneOrGeneProduct",
+#       "DiseaseOrPhenotypicFeature",
+#       "SequenceVariant"
+#     ],
+#     "range": [
+#       "DiseaseOrPhenotypicFeature",
+#       "GeneOrGeneProduct",
+#       "ChemicalEntity",
+#       "SequenceVariant"
+#     ],
+#     "reflexive": "false",
+#     "irreflexive": "true",
+#     "symmetric": "true",
+#     "antisymmetric": "false",
+#     "transitive": "false",
+#     "implied_by": [],
+#     "tokens": [],
+#     "verb": 0
+#   },}, dataset='biored', doc=0, subset='train', model=__def_model)

@@ -314,7 +314,8 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
     _expandies.clear();
     for (JSONObject j in widget.schemaJson) {
       // _data.add(SchemaItem.fromJson(relJson));
-      j['checked'] = false;
+      j.putIfAbsent('checked', () => false);
+      // j['checked'] = false;
       _expandies.add(ExpansionTileController());
     }
   }
@@ -345,8 +346,6 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
     }
     return newJson;
   }
-
-  void onEditSchema(rel, field, newValue) {}
 
   void deleteFromSchema(int index) {
     // if (index < _data.length) {

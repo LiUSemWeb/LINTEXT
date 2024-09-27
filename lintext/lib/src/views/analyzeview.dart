@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
+import 'package:rel_ex_interface/src/views/statementpane.dart';
 
 class AnalyzeView extends StatefulWidget {
   const AnalyzeView(
@@ -66,18 +67,24 @@ class _AnalyzeViewState extends State<AnalyzeView> {
               itemBuilder: (context, index) => Row(
                 // controller: _expandies[index],
                 children: [
-                  widget.rankList[index][7]
+                  widget.rankList[index][5]
                       ? const Icon(
                           Icons.check_box,
                           color: Colors.blue,
                         )
                       : const Icon(Icons.disabled_by_default_rounded,
                           color: Colors.red),
-                  Expanded(child: Text('${widget.rankList[index][6]}')),
+                  // Expanded(child: Text('${widget.rankList[index][4]}')),
+                  Expanded(
+                    child: StatementView(
+                      text: widget.rankList[index][4].split(' '),
+                      scores: (widget.rankList[index][6]),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(right: 16.0),
-                    child:
-                        Text('${widget.rankList[index][8].toStringAsFixed(2)}'),
+                    child: Text(
+                        '${widget.rankList[index][widget.rankList[index].length - 1].toStringAsFixed(2)}'),
                   ),
                   // SizedBox(
                   //   width: MediaQuery.sizeOf(context).width * 0.4,

@@ -148,7 +148,7 @@ class _MainPageViewState extends State<MainPageView>
     });
     print("We got $r");
     setState(() {
-      rankList = r['results'];
+      rankList = r['results'] ?? [];
     });
   }
 
@@ -178,7 +178,6 @@ class _MainPageViewState extends State<MainPageView>
         child: FloatingActionButton(
           backgroundColor: Colors.blue,
           // tooltip: 'Increment',
-
           onPressed: () {},
           child: const Icon(
             Icons.add,

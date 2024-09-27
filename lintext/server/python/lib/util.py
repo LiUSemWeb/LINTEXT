@@ -235,10 +235,8 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                 # times = []
                 for prompt_id in prompts: # rel_info:
                     print(f"{prompt_id=}")
-                    if prompt_id.split('|')[0] not in p_doc.relations:
-                        continue
-                    # nnow = time.time()
-                    # print(f"PI: {prompt_id}")
+                    # if prompt_id.split('|')[0] not in p_doc.relations:
+                    #     continue
                     ans = [(a[0], a[2]) for a in p_doc.answers(detailed=False) if a[1] == prompt_id.split('|')[0]]
                     # BioRED explicitly states that all relations are non-directional.
                     # This is honestly false, but we marked the ones that aren't clearly non-directional to avoid issues.

@@ -1,6 +1,4 @@
-# Scree! w/ Me: Switchboard
-# Copyright (C) 2022 Reyncke Lab - All Rights Reserved
-#
+
 import asyncio
 import os
 import random

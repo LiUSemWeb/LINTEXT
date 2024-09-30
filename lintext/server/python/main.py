@@ -1,6 +1,7 @@
 
 import asyncio
 import os
+from pathlib import Path
 import random
 
 import uvicorn
@@ -81,19 +82,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.post("/", response_class=CustomJSONResponse)
+async def respond_post(data: Request) -> Dict[str, Any]:
+    print("Received request!")
+    out_json = {'tokens': []}
+    try:
+        in_json = await data.json()
+        method = in_json['method']
+        body = in_json['body']
+        if method == 'fetch':
+            out_json['tokens'].extend(getDocument(**body))
+            print('Fetch schema?', in_json['schema'])
+            if in_json['schema']:
+                out_json['schema'] = getRelInfo(body['dataset'].lower())
+        elif method == 'parse':
+            tokenized = await asyncio.create_task(tokenize(body['text']))
+            print(tokenized)
+            for token in tokenized:
+                i = random.randint(-3, 2)
+                out_json['tokens'].append({'text': token, 'type': str(i) if i >= 0 else '', 'ent': i, 'ment': i})
+        elif method == 'analyze':
 
-@app.get("/", status_code=501, response_class=HTMLResponse)
-def respond_get():
-    return """
-    <html>
-        <head>
-            <title>501 Not Implemented</title>
-        </head>
-        <body>
-            <h1>501 Not Implemented</h1>
-        </body>
-    </html>
-    """
+            out_json['results'] = analyze(**body)
+    except json.decoder.JSONDecodeError:
+        print(f"[ERROR] Received an unexpected POST request:\n{data}")
+
+    return out_json
+
+# This MUST be after the above line enabling the POST API.
+interface_path = 'lintext/build/web/'
+app.mount("/", StaticFiles(directory=interface_path, html=True), name="/")
 
 async def tokenize(text:str):
     return getBERT().tokenizer.tokenize(text)
@@ -181,35 +199,6 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
       'model': ...,  # The MLM model name to be used.
     }
 
-
-
-
-@app.post("/", response_class=CustomJSONResponse)
-async def respond_post(data: Request) -> Dict[str, Any]:
-    print("Received request!")
-    out_json = {'tokens': []}
-    try:
-        in_json = await data.json()
-        method = in_json['method']
-        body = in_json['body']
-        if method == 'fetch':
-            out_json['tokens'].extend(getDocument(**body))
-            print('Fetch schema?', in_json['schema'])
-            if in_json['schema']:
-                out_json['schema'] = getRelInfo(body['dataset'].lower())
-        elif method == 'parse':
-            tokenized = await asyncio.create_task(tokenize(body['text']))
-            print(tokenized)
-            for token in tokenized:
-                i = random.randint(-3, 2)
-                out_json['tokens'].append({'text': token, 'type': str(i) if i >= 0 else '', 'ent': i, 'ment': i})
-        elif method == 'analyze':
-
-            out_json['results'] = analyze(**body)
-    except json.decoder.JSONDecodeError:
-        print(f"[ERROR] Received an unexpected POST request:\n{data}")
-
-    return out_json
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Starts a server for parsing text and doing relation extraction.')

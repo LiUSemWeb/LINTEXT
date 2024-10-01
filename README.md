@@ -26,3 +26,14 @@ If you're using conda, you can use the `.yml` file provided to create the enviro
 
 ### Flutter
 See `lintext/pubspec.yaml` for Flutter dependencies. We use flutter sdk version 3.5.0.
+
+
+## Next features:
+- The add button will actually add schema elements!
+- The AV will let you select different similarity metrics.
+- The DV will let you choose different tokenizers.
+- The SV will include a select all/none button
+- ...
+- The AV will include a little color key that lets you change the low/high colors.
+
+*(AV = Analyze View, DV = Document View, SV = Schema View)

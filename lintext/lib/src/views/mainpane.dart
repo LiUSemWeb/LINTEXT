@@ -128,6 +128,26 @@ class _MainPageViewState extends State<MainPageView>
     });
   }
 
+  void addNewRelation() {
+    setState(() {
+      schemaJson.add({
+        'rel_id': "",
+        'name': "",
+        'desc': "",
+        'prompt_xy': "?x ?y.",
+        'prompt_yx': "?y ?x.",
+        'domain': [],
+        'range': [],
+        'reflexive': false,
+        'irreflexive': false,
+        'symmetric': false,
+        'antisymmetric': false,
+        'transitive': false,
+        'checked': false
+      });
+    });
+  }
+
   Future<void> doAnalyze(JSONList schema) async {
     JSONObject formattedSchema = {
       for (JSONObject v in schema)
@@ -178,7 +198,7 @@ class _MainPageViewState extends State<MainPageView>
         child: FloatingActionButton(
           backgroundColor: Colors.blue,
           // tooltip: 'Increment',
-          onPressed: () {},
+          onPressed: addNewRelation,
           child: const Icon(
             Icons.add,
             color: Colors.white,

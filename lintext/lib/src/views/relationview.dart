@@ -145,7 +145,7 @@ class _SchemaItemState extends State<SchemaItem> {
         // onFieldSubmitted: (value) => {widget.json[key] = value},
         // onEditingComplete: () => {widget.json[key] = value},
         minLines: 1,
-        maxLines: null,
+        maxLines: key == 'desc' ? null : 1,
       ));
     }
 
@@ -449,7 +449,9 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
                       horizontal: VisualDensity.minimumDensity),
                 ),
               ),
-              Text(widget.schemaJson[index]['name']),
+              Text(widget.schemaJson[index]['name'].isEmpty
+                  ? 'Unnamed Relation'
+                  : widget.schemaJson[index]['name']),
               IconButton(
                 onPressed: () {
                   // ExpansionTileController ex = _expandies[index];

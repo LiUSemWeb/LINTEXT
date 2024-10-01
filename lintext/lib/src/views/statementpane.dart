@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:rel_ex_interface/src/util/json.dart';
 
 // import 'settings_controller.dart';
 

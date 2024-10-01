@@ -145,7 +145,7 @@ def getRelInfo(dataset):
 def error(text):
     return {'error': text}
 
-def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', **kwargs):
+def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', num_passes=0, **kwargs):
     print(f"Shall we work?\n{dataset}_{subset} {doc} {model}\n{schema}")
     if not schema:
         return error('Schema must include at least one relation.')
@@ -160,16 +160,17 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
             fb = getBERT(model)
             if fb:
                 res = run_many_experiments(task_name=dataset.lower(), dset=subset.lower(), rel_info=schema, nonlin=nonlin,
-                                    pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=0, num_passes=1, docnum=doc,
+                                    pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=0, num_passes=num_passes+1, docnum=doc,
                                     max_batch=1000, model=fb, data_path=data_path)
+                res = res[num_passes]
                 print("RESULTS:")
-                lis_a = res[doc]
+                # lis_a = res[doc]
                 lis_b = []
                 seen = set()
-                for rel in lis_a:
+                for rel in res:
                     # (3, 2, 0, 1, tensor([2002, 4502, 3406, 5666, 2618, 4517, 5387, 1006, 1044, 2078, 2546, 1007, 1011, 1020]),
                     # tensor([16736,  1011, 14447, 14671]), True, -12.33619499206543)
-                    lis_b.extend(lis_a[rel][scorer])
+                    lis_b.extend(res[rel][scorer])
                 lis_c = []
                 for r in sorted(lis_b, key=lambda x: -x[-2]):
                     e1, e2, m1, m2, i1, i2, truth, tokens, score, allscores = r

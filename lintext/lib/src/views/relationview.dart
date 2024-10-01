@@ -143,7 +143,11 @@ class _SchemaItemState extends State<SchemaItem> {
         // onChanged: (value) => updateString(key, value),
         // validator: (value) => ,
         // onFieldSubmitted: (value) => {widget.json[key] = value},
-        // onEditingComplete: () => {widget.json[key] = value},
+        onChanged: (value) => {
+          setState(() {
+            widget.json[key] = value;
+          })
+        },
         minLines: 1,
         maxLines: key == 'desc' ? null : 1,
       ));
@@ -438,7 +442,7 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
               Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Checkbox(
-                  value: widget.schemaJson[index]['checked'],
+                  value: widget.schemaJson[index]['checked'] ?? true,
                   onChanged: (e) => {
                     setState(() {
                       widget.schemaJson[index]['checked'] =

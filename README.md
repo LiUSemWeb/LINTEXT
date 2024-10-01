@@ -2,7 +2,6 @@
 Currently under review as a demo at EKAW 2024. See also https://github.com/LiUSemWeb/entity-recontextualization.
 
 ## Running the system
-This is a fairly incomplete set of instructions to run the system; they will be improved shortly.
 To run the system, for now you will need to have Flutter and Python installed.
 After cloning, navigate to the root of the project.
 Build the web project using `flutter build web --web-renderer html`.
@@ -13,12 +12,17 @@ The UI can be access by default at `localhost:13679`.
 You can also run the webserver without building the web version of the UI.
 Then you need to open/run the UI through other means, such as VSCode by opening `main.dart` and building/running the app specifically for your OS.
 
-## Requirements
-TBD.
-- Python 3.8+
-- CUDA (Can probably work fine without, but will be very slow.)
-- flutter 3.5.0+ (If building yourself)
+## Environment
+You likely want to run the python side of things in a virtual environment.
+If you're using conda, you can use the `.yml` file provided to create the environment we use: `conda env create -f lintext/server/relex.yml`.
 
-See `lintext/pubspec.yaml` for Flutter dependencies and `lintext/server/python/requirements.txt` for Python dependencies.
+### Python requirements
+- Python 3.8
+- uvicorn 0.29
+- fastapi 0.115
+- pytorch 2.4.1
+- pytorch-cuda 12.4
+- transformers 4.40.2
 
-
+### Flutter
+See `lintext/pubspec.yaml` for Flutter dependencies. We use flutter sdk version 3.5.0.

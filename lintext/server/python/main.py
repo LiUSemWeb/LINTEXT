@@ -62,7 +62,9 @@ app = FastAPI()
 
 origins = [
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:13679",
+    "http://magicant",
+    "http://magicant:13679"
     "*",
 ]
 

@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
 import 'package:rel_ex_interface/src/views/statementpane.dart';
+
+typedef AnalyzeCallback = Future<void> Function({required int numPasses});
 
 class AnalyzeView extends StatefulWidget {
   const AnalyzeView(
@@ -10,7 +13,7 @@ class AnalyzeView extends StatefulWidget {
       required this.rankList,
       required this.schemaJson});
 
-  final AsyncCallback callback;
+  final AnalyzeCallback callback;
   final List<dynamic> rankList;
   final JSONList schemaJson;
 
@@ -19,6 +22,12 @@ class AnalyzeView extends StatefulWidget {
 }
 
 class _AnalyzeViewState extends State<AnalyzeView> {
+  TextEditingController numPassesController = TextEditingController(text: "0");
+
+  Future<void> callback() async {
+    await widget.callback(numPasses: int.parse(numPassesController.text));
+  }
+
   @override
   Widget build(BuildContext context) {
     int checkCount =
@@ -26,29 +35,60 @@ class _AnalyzeViewState extends State<AnalyzeView> {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Wrap(
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+        ExpansionTile(
+          title: Row(
+            key: const Key('AnalyzeOptions'),
+            children: [
+              Wrap(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: callback,
+                    child: const Text('Analyze!'),
                   ),
-                  onPressed: widget.callback,
-                  child: const Text('Analyze!'),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$checkCount/${widget.schemaJson.length} selected.',
+                    style: (checkCount == 0)
+                        ? const TextStyle(color: Colors.red)
+                        : null,
+                  ),
                 ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  '$checkCount/${widget.schemaJson.length} selected.',
-                  style: (checkCount == 0)
-                      ? const TextStyle(color: Colors.red)
-                      : null,
+              ),
+            ],
+          ),
+          children: [
+            SizedBox(
+              width: 60,
+              child: Focus(
+                onFocusChange: (hasFocus) => {
+                  if (!hasFocus && numPassesController.text.isEmpty)
+                    numPassesController.text = "0"
+                },
+                canRequestFocus: false,
+                child: TextFormField(
+                  maxLines: 1,
+                  maxLength: 1,
+                  controller: numPassesController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  onChanged: (value) => {
+                    if (value.isNotEmpty)
+                      numPassesController.text = int.parse(value).toString()
+                  },
+                  decoration: const InputDecoration(
+                    labelText: "# Passes",
+                  ),
                 ),
               ),
             ),

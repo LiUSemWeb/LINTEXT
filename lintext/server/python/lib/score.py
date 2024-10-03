@@ -14,12 +14,20 @@ class PllScoringMethod(ScoringMethod):
     def __init__(self, label):
         super(PllScoringMethod, self).__init__(label)
 
-    def forward(self, probs, origids, return_all=False, **kwargs):
+    def forward(self, probs, origids, return_all=False, return_skipped=False, **kwargs):
+        # mask: if pPLL needs to be used, then at least one id is -1
         mask = origids >= 0
+        # Set the -1s to 0 so that PLL can be calculated, we'll just ignore those later.
         origids[~mask] = 0
         slen = len(probs) - 1
-        dia = torch.diag(probs[1:].gather(-1, origids.unsqueeze(0).repeat(slen, 1).unsqueeze(-1)).squeeze(-1), diagonal=0)[mask]
-        dia_list = dia.tolist()
+        # Get the diagonal scores.
+        dia = torch.diag(probs[1:].gather(-1, origids.unsqueeze(0).repeat(slen, 1).unsqueeze(-1)).squeeze(-1), diagonal=0)
+        if return_skipped:
+            dia[~mask] = -1.0
+            dia_list = dia.tolist()
+        dia = dia[mask]
+        if not return_skipped:
+            dia_list = dia.tolist()
         prob = torch.mean(torch.log_(dia), dim=-1).detach().item()
         if return_all:
             return prob, dia_list

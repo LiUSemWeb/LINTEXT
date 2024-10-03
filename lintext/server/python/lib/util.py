@@ -213,7 +213,11 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
         all_all_scores = dict()
         for p_doc in run_exp(fb, task_name=task_name, dset=dset, doc=docnum, num_blanks=num_blanks, num_passes=num_passes, use_ent=use_ent, skip=skip, model=model_name, start_at=start_at, top_k=0, data_path=data_path):
             all_scores = dict()
-            for nps in range(0, num_passes):
+            # for nps in range(0, num_passes):
+            # For this system, we only need to do what we asked to do.
+            nl = FitBert.nonlins[nonlin]
+            ev_tkns_0 = p_doc.entity_vecs(nonlinearity=nl, pooling=pooler, passes=0)[1]
+            for nps in [num_passes - 1]:
                 print(f"{nps=}")
                 # if os.path.exists(docfile.replace(f'_{num_passes}p', f'_{nps}p')):
                 #     print(f"Document {p_doc.num} at {nps} passes skipped.", flush=True)
@@ -223,7 +227,6 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                 print(f"{nonlin=}")
                 # print(f"NL: {nonlin}")
                 # all_scores[nonlin] = {}
-                nl = FitBert.nonlins[nonlin]
                 # for pooler in poolers:
                 print(f"{pooler=}")
                 # print(f"PL: {pooler}")
@@ -326,11 +329,16 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                             for (e1, e2, m1, m2), s in zip(all_labels[:_sentences_per_batch], sm_bert.view(-1, size, sm_bert.shape[1], sm_bert.shape[2])):
                                 # print("S:", s.shape)
                                 for scorer in scorers:
-                                    origids = None
-                                    if scorer.label == "pll":
-                                        # Then make the index from its parts, same as the other thing.
-                                        origids = replace_ids(ev_tkns[m1], ev_tkns[m2], prompt_data[prompt_id])[1:-1].to(fb.device)
-                                    all_scores[prompt_id][scorer.label].append((e1, e2, m1, m2, ev_tkns[m1], ev_tkns[m2], (e1, e2) in ans, origids.cpu(), *scorer(s, origids=origids, return_all=True)))
+                                    # origids = None
+                                    # if scorer.label == "pll":
+                                    #     # Then make the index from its parts, same as the other thing.
+                                    origids = replace_ids(ev_tkns[m1], ev_tkns[m2], prompt_data[prompt_id])[1:-1].to(fb.device)
+                                    if nps > 1:
+                                        origids_full = replace_ids(ev_tkns_0[m1], ev_tkns_0[m2], prompt_data[prompt_id])[1:-1]
+                                    else:
+                                        origids_full = origids.cpu()
+
+                                    all_scores[prompt_id][scorer.label].append((e1, e2, m1, m2, ev_tkns[m1], ev_tkns[m2], (e1, e2) in ans, origids_full, *scorer(s, origids=origids, return_all=True, return_skipped=True)))
                             all_labels = all_labels[_sentences_per_batch:]
                             # print(f"Document {p_doc.num} Tick.", flush=True)
                             # for scorer in scorers:

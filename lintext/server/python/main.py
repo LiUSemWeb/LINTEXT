@@ -179,8 +179,7 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                     if (e1, e2) not in seen:
                         # t1 = fb.tokenizer.convert_ids_to_tokens(i1)
                         # t2 = fb.tokenizer.convert_ids_to_tokens(i2)
-                        statement = " ".join(fb.tokenizer.convert_ids_to_tokens(tokens))
-
+                        statement = " ".join(fb.tokenizer.convert_ids_to_tokens([1 if t == -1 else t for t in tokens]))
                         # statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
                         # seen.add((e1, e2))
                         lis_c.append([e1, e2, m1, m2, statement, truth, allscores, score])

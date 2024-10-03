@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
 import 'package:rel_ex_interface/src/views/statementpane.dart';
 
-typedef AnalyzeCallback = Future<void> Function({required int numPasses});
+typedef AnalyzeCallback = Future<void> Function({required Map<String, Object> analyzeParams});
 
 class AnalyzeView extends StatefulWidget {
   const AnalyzeView(
@@ -25,7 +25,11 @@ class _AnalyzeViewState extends State<AnalyzeView> {
   TextEditingController numPassesController = TextEditingController(text: "0");
 
   Future<void> callback() async {
-    await widget.callback(numPasses: int.parse(numPassesController.text));
+    await widget.callback(
+      analyzeParams: {
+        'num_passes': int.parse(numPassesController.text),
+      },
+    );
   }
 
   @override
@@ -92,6 +96,7 @@ class _AnalyzeViewState extends State<AnalyzeView> {
                 ),
               ),
             ),
+            const VerticalDivider(thickness: 32,),
           ],
         ),
         // Expanded(

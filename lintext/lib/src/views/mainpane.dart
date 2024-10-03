@@ -148,7 +148,7 @@ class _MainPageViewState extends State<MainPageView>
     });
   }
 
-  Future<void> doAnalyze({required JSONList schema, int numPasses = 0}) async {
+  Future<void> doAnalyze({required JSONList schema, Map<String, Object>? analyzeParams}) async {
     JSONObject formattedSchema = {
       for (JSONObject v in schema)
         if (v['checked']) v['rel_id']: Map.from(v)..remove('rel_id')
@@ -164,8 +164,8 @@ class _MainPageViewState extends State<MainPageView>
         'subset': subsetController.text,
         'doc': int.parse(docnumController.text),
         'model': 'bert-large-uncased',
-        'num_passes': numPasses,
-      } as JSONObject,
+        // 'num_passes': numPasses,
+      }..addAll(analyzeParams ?? {}),
     });
     print("We got $r");
     setState(() {
@@ -375,8 +375,8 @@ class _MainPageViewState extends State<MainPageView>
                         },
                       ),
                       AnalyzeView(
-                        callback: ({required int numPasses}) =>
-                            doAnalyze(schema:schemaJson, numPasses:numPasses),
+                        callback: ({required Map<String, Object> analyzeParams}) =>
+                            doAnalyze(schema:schemaJson, analyzeParams:analyzeParams),
                         rankList: rankList,
                         schemaJson: schemaJson,
                       ),

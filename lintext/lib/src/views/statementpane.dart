@@ -25,6 +25,15 @@ class StatementView extends StatelessWidget {
     return textColor;
   }
 
+  TextStyle textStyleFromScore(double score, BuildContext context, {Color scorelessColor = Colors.transparent}) {
+    Color? scoreColor = score >= 0.0
+        ? Color.lerp(lowScoreColor, highScoreColor, score)
+        : scorelessColor;
+
+    return TextStyle(
+        backgroundColor: scoreColor, color: getColor(scoreColor, context));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -35,13 +44,7 @@ class StatementView extends StatelessWidget {
               padding: const EdgeInsets.only(left: 2.0, right: 2.0),
               child: Text(
                 text[i],
-                style: TextStyle(
-                    backgroundColor: Color.lerp(
-                        lowScoreColor, highScoreColor, scores[i] as double),
-                    color: getColor(
-                        Color.lerp(
-                            lowScoreColor, highScoreColor, scores[i] as double),
-                        context)),
+                style: textStyleFromScore(scores[i], context),
               ),
             )
         ]

@@ -257,7 +257,7 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                     # Maybe a retrieval system (RAG?) can make this selection in the wild?
                     if len(ans) == 0:
                         print("noans")
-                        continue
+                        # continue
                     all_scores[prompt_id] = {}
                     for sc in scorers:
                         all_scores[prompt_id][sc.label] = []

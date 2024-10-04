@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rel_ex_interface/src/util/const.dart';
 
 import 'views/mainpane.dart';
 
@@ -8,10 +9,10 @@ import 'views/mainpane.dart';
 class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
-    // required this.settingsController,
+    required this.settings,
   });
 
-  // final SettingsController settingsController;
+  final SettingsMemory settings;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
               //   return const SampleItemDetailsView();
               case MainPageView.routeName:
               default:
-                return const MainPageView();
+                return MainPageView(settings: settings);
             }
           },
         );

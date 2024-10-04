@@ -19,9 +19,10 @@ class SharedState {
 class MainPageView extends StatefulWidget {
   const MainPageView({
     super.key,
+    required this.settings,
     // this.items = const [SampleItem(1), SampleItem(2), SampleItem(3)],
   });
-
+  final SettingsMemory settings;
   static const routeName = '/';
   @override
   State<MainPageView> createState() => _MainPageViewState();
@@ -163,7 +164,7 @@ class _MainPageViewState extends State<MainPageView>
         'dataset': datasetController.text,
         'subset': subsetController.text,
         'doc': int.parse(docnumController.text),
-        'model': 'bert-large-uncased',
+        // 'model': 'bert-large-uncased',
         // 'num_passes': numPasses,
       }..addAll(analyzeParams ?? {}),
     });
@@ -379,6 +380,7 @@ class _MainPageViewState extends State<MainPageView>
                             doAnalyze(schema:schemaJson, analyzeParams:analyzeParams),
                         rankList: rankList,
                         schemaJson: schemaJson,
+                        settings: widget.settings,
                       ),
                       // Text('Emptier')
                     ],

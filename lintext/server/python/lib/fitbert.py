@@ -161,6 +161,7 @@ class FitBert:
             for t in range(tokens_per_blank):
                 add_tokens.append(f"[ENT_{e}_{t}]")
             add_tokens.append(f"[ENT_{e}_x]")  # Quick hack to help with preprocessing
+            add_tokens.append(f"[E{e}]") # Helps with display
         add_tokens.append('[ENT_BEG]')
         add_tokens.append('[ENT_END]')
         self.tokenizer.add_tokens(add_tokens, special_tokens=True)  # Add the tokens to the tokenizer.

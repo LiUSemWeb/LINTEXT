@@ -128,7 +128,8 @@ def getEntity(ment, masked_doc):
 def getDocument(dataset, subset, docnum, model='', **kwargs):
     # read_document(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path='data', use_ent=use_ent)
     mlm = getBERT(model) if model else getBERT()
-    d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=0, use_ent=True, mlm=mlm))
+    mlm.extend_bert(50, 1)
+    d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=1, use_ent=False, mlm=mlm))
 
     for a, b in zip(d.masked_doc['tokens'], d.masked_doc['ments']):
         yield {'text': a, 'type':d.mention_types[b] if b >= 0 else '', 'ent': getEntity(b, d.masked_doc), 'ment': b}
@@ -147,7 +148,7 @@ def getRelInfo(dataset):
 def error(text):
     return {'error': text}
 
-def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', num_passes=0, **kwargs):
+def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', num_passes=0, num_blanks=1, **kwargs):
     print(f"Shall we work?\n{dataset}_{subset} {doc} {model}\n{schema}")
     if not schema:
         return error('Schema must include at least one relation.')
@@ -162,8 +163,10 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
             fb = getBERT(model)
             if fb:
                 res = run_many_experiments(task_name=dataset.lower(), dset=subset.lower(), rel_info=schema, nonlin=nonlin,
-                                    pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=0, num_passes=num_passes+1, docnum=doc,
-                                    max_batch=1000, model=fb, data_path=data_path)
+                                    pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=num_blanks, num_passes=num_passes+1, docnum=doc,
+                                    max_batch=1000, model=fb, data_path=data_path, use_ent=False)
+                # print(res.keys())
+                # print(num_passes, res[1])
                 res = res[num_passes]
                 print("RESULTS:")
                 # lis_a = res[doc]
@@ -178,8 +181,16 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                     e1, e2, m1, m2, i1, i2, truth, tokens, score, allscores = r
                     if (e1, e2) not in seen:
                         # t1 = fb.tokenizer.convert_ids_to_tokens(i1)
+                        if num_blanks == 1:
+                            tokens_2 = tokens[:]
+                            blanks = (tokens_2 == -1).nonzero(as_tuple=True)[0]
+                            if len(blanks) > 0:
+                                tokens_2[blanks[0]] = fb.tokenizer.convert_tokens_to_ids(f"[E{e1}]")
+                                tokens_2[blanks[1]] = fb.tokenizer.convert_tokens_to_ids(f"[E{e2}]")
+                        else:
+                            tokens_2 = tokens
                         # t2 = fb.tokenizer.convert_ids_to_tokens(i2)
-                        statement = " ".join(fb.tokenizer.convert_ids_to_tokens([1 if t == -1 else t for t in tokens]))
+                        statement = " ".join(fb.tokenizer.convert_ids_to_tokens([1 if t == -1 else t for t in tokens_2]))
                         # statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
                         # seen.add((e1, e2))
                         lis_c.append([e1, e2, m1, m2, statement, truth, allscores, score])

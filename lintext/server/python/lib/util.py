@@ -187,7 +187,7 @@ def meminfo():
     return f"{f:.2f}g/{t:.2f}g"
 
 
-def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num_blanks, docnum=-1, num_passes=1, max_batch=2000, use_ent=True, skip=[], stopfile='', model=None, start_at=0, data_path='data'):
+def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num_blanks, docnum=-1, num_passes=1, max_batch=2000, use_ent=False, skip=[], stopfile='', model=None, start_at=0, data_path='data'):
     # import time
     if num_blanks == 0:
         poolers = [None]

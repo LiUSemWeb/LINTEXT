@@ -125,11 +125,11 @@ def getEntity(ment, masked_doc):
                 return e
     return -1
 
-def getDocument(dataset, subset, docnum, model='', **kwargs):
+def getDocument(dataset, subset, docnum, model='', num_blanks=0, **kwargs):
     # read_document(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path='data', use_ent=use_ent)
     mlm = getBERT(model) if model else getBERT()
     mlm.extend_bert(50, 1)
-    d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=1, use_ent=False, mlm=mlm))
+    d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=num_blanks, use_ent=False, mlm=mlm))
 
     for a, b in zip(d.masked_doc['tokens'], d.masked_doc['ments']):
         yield {'text': a, 'type':d.mention_types[b] if b >= 0 else '', 'ent': getEntity(b, d.masked_doc), 'ment': b}
@@ -148,7 +148,7 @@ def getRelInfo(dataset):
 def error(text):
     return {'error': text}
 
-def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', num_passes=0, num_blanks=1, **kwargs):
+def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model, nonlin='top50', pooler=None, scorer='pll', num_passes=0, num_blanks=0, **kwargs):
     print(f"Shall we work?\n{dataset}_{subset} {doc} {model}\n{schema}")
     if not schema:
         return error('Schema must include at least one relation.')

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rel_ex_interface/src/util/const.dart';
@@ -132,7 +131,8 @@ class _AnalyzeViewState extends State<AnalyzeView> {
                       ],
                       onChanged: (value) => {
                         if (value.isNotEmpty)
-                          controllers['num_passes']!.text = int.parse(value).toString()
+                          controllers['num_passes']!.text =
+                              int.parse(value).toString()
                       },
                       decoration: const InputDecoration(
                         labelText: "# Passes",

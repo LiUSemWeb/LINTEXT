@@ -149,7 +149,8 @@ class _MainPageViewState extends State<MainPageView>
     });
   }
 
-  Future<void> doAnalyze({required JSONList schema, Map<String, Object>? analyzeParams}) async {
+  Future<void> doAnalyze(
+      {required JSONList schema, Map<String, Object>? analyzeParams}) async {
     JSONObject formattedSchema = {
       for (JSONObject v in schema)
         if (v['checked']) v['rel_id']: Map.from(v)..remove('rel_id')
@@ -174,6 +175,31 @@ class _MainPageViewState extends State<MainPageView>
     });
   }
 
+  Widget? getFAB() {
+    print(tc.index);
+
+    return ListenableBuilder(
+        listenable: tc,
+        builder: (BuildContext context, Widget? child) {
+          return tc.index == 0
+              ? SizedBox(
+                  height: 32,
+                  width: 32,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.blue,
+                    // tooltip: 'Increment',
+                    onPressed: addNewRelation,
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                )
+              : const SizedBox(width: 0, height: 0);
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,20 +220,7 @@ class _MainPageViewState extends State<MainPageView>
           ],
         ),
       ),
-      floatingActionButton: SizedBox(
-        height: 32,
-        width: 32,
-        child: FloatingActionButton(
-          backgroundColor: Colors.blue,
-          // tooltip: 'Increment',
-          onPressed: addNewRelation,
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-      ),
+      floatingActionButton: getFAB(),
       body: Row(
         children: [
           Expanded(
@@ -376,8 +389,11 @@ class _MainPageViewState extends State<MainPageView>
                         },
                       ),
                       AnalyzeView(
-                        callback: ({required Map<String, Object> analyzeParams}) =>
-                            doAnalyze(schema:schemaJson, analyzeParams:analyzeParams),
+                        callback: (
+                                {required Map<String, Object> analyzeParams}) =>
+                            doAnalyze(
+                                schema: schemaJson,
+                                analyzeParams: analyzeParams),
                         rankList: rankList,
                         schemaJson: schemaJson,
                         settings: widget.settings,

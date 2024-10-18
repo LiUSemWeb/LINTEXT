@@ -333,7 +333,7 @@ def run_many_experiments(task_name, dset, rel_info, nonlin, pooler, scorers, num
                                     # if scorer.label == "pll":
                                     #     # Then make the index from its parts, same as the other thing.
                                     origids = replace_ids(ev_tkns[m1], ev_tkns[m2], prompt_data[prompt_id])[1:-1].to(fb.device)
-                                    if nps > 1:
+                                    if nps >= 1:
                                         origids_full = replace_ids(ev_tkns_0[m1], ev_tkns_0[m2], prompt_data[prompt_id])[1:-1]
                                     else:
                                         origids_full = origids.cpu()

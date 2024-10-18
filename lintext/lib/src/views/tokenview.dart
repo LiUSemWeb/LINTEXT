@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rel_ex_interface/src/util/json.dart';
 
@@ -168,14 +167,22 @@ class TokensView extends StatelessWidget {
 
   Color getInnerColor(int other) {
     // int other = selectedEnt;
-    double lerp = (other < 0) ? 0.2 : (ent != other) ? 0.6 : .0;
+    double lerp = (other < 0)
+        ? 0.2
+        : (ent != other)
+            ? 0.6
+            : .0;
     return Color.lerp(
             TokensView.resolveEntityColor(ent), Colors.transparent, lerp) ??
         Colors.transparent;
   }
 
   Color getOutlineColor(String? other) {
-    double lerp = (other == null) ? 0.2 : (eType != other) ? 0.6 : .0;
+    double lerp = (other == null)
+        ? 0.2
+        : (eType != other)
+            ? 0.6
+            : .0;
     return Color.lerp(
             TokensView.resolveTypeColor(eType), Colors.transparent, lerp) ??
         Colors.transparent;
@@ -210,9 +217,10 @@ class TokensView extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 1.0),
           decoration: BoxDecoration(
             // border: Border.all(color: color, width: 4),
-            border: Border.all(color: getOutlineColor(selected.selectedType), width: 2
-              // horizontal: BorderSide(color: outlineColor, width: 2),
-            ),
+            border: Border.all(
+                color: getOutlineColor(selected.selectedType), width: 2
+                // horizontal: BorderSide(color: outlineColor, width: 2),
+                ),
             borderRadius: BorderRadius.circular(20),
             color: getInnerColor(selected.ent),
           ),
@@ -237,20 +245,20 @@ class TokensView extends StatelessWidget {
     }
 
     // if (entListener != null) {
-    if(ent >= 0) {
+    if (ent >= 0) {
       body = MouseRegion(
-            child: body,
-            onEnter: (event) {
-              selected.setEnt(ent);
-              // selectedEnt.value = ent;
-              selected.selectedType = eType;
-            },
-            onExit: (event) {
-              selected.setEnt(-1);
-              selected.selectedType = null;
-              // selectedType.value = null;
-            },
-          );
+        child: body,
+        onEnter: (event) {
+          selected.setEnt(ent);
+          // selectedEnt.value = ent;
+          selected.selectedType = eType;
+        },
+        onExit: (event) {
+          selected.setEnt(-1);
+          selected.selectedType = null;
+          // selectedType.value = null;
+        },
+      );
     }
     //     },
     //   );

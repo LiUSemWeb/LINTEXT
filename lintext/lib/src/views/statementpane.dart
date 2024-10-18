@@ -25,7 +25,8 @@ class StatementView extends StatelessWidget {
     return textColor;
   }
 
-  TextStyle textStyleFromScore(double score, BuildContext context, {Color scorelessColor = Colors.transparent}) {
+  TextStyle textStyleFromScore(double score, BuildContext context,
+      {Color scorelessColor = Colors.transparent}) {
     Color? scoreColor = score >= 0.0
         ? Color.lerp(lowScoreColor, highScoreColor, score)
         : scorelessColor;
@@ -34,19 +35,40 @@ class StatementView extends StatelessWidget {
         backgroundColor: scoreColor, color: getColor(scoreColor, context));
   }
 
+  Widget buildInnerText(BuildContext context, int i) {
+    String tx = text[i];
+    double leftPad = 2.0;
+    double rightPad = 2.0;
+    if (tx.startsWith("##")) {
+      tx = tx.substring(2);
+      leftPad = 0.0;
+    }
+    if (text.length > (i + 1) && text[i + 1].startsWith("##")) {
+      rightPad = 0.0;
+    }
+
+    Widget innerText = Text(
+      tx,
+      style: textStyleFromScore(scores[i], context),
+    );
+    if (scores[i] >= 0.0) {
+      innerText = Tooltip(
+        message: 'Token: ${text[i]}\nScore: ${scores[i].toStringAsFixed(3)}',
+        child: innerText,
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(left: leftPad, right: rightPad),
+      child: innerText,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
       children: [
         Row(children: [
-          for (int i = 0; i < text.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(left: 2.0, right: 2.0),
-              child: Text(
-                text[i],
-                style: textStyleFromScore(scores[i], context),
-              ),
-            )
+          for (int i = 0; i < text.length; i++) buildInnerText(context, i)
         ]
 
             //  [

@@ -35,6 +35,7 @@ class TokensView extends StatelessWidget {
       this.ent = -1,
       this.eType,
       this.showHover = true,
+      this.showTokens = false,
       this.selectedEnt = -1});
   // final String text;
   // final Color innerColor;
@@ -44,12 +45,17 @@ class TokensView extends StatelessWidget {
   final int selectedEnt;
   final String? eType;
   final bool showHover;
+  final bool showTokens;
   // static int pos = 0;
   static final selected = HoverFeatures();
   static final Map<String, Color> typeMap = <String, Color>{};
   static final Map<int, Color> entityMap = <int, Color>{};
 
   String get text {
+    if (!showTokens) {
+      return tokens.join(' ');
+    }
+
     StringBuffer sb = StringBuffer(tokens[0]);
     for (String t in tokens.skip(1)) {
       if (t.startsWith("##")) {
@@ -100,7 +106,7 @@ class TokensView extends StatelessWidget {
     }
   }
 
-  static List<Widget> fromJson(JSONObject json) {
+  static List<Widget> fromJson(JSONObject json, {bool showTokens=false}) {
     // print(json);
     if (json.isEmpty || !json.containsKey('tokens')) return [];
 
@@ -123,6 +129,7 @@ class TokensView extends StatelessWidget {
               eType: typeInProgress,
               ent: entInProgress,
               selectedEnt: selected.ent,
+              showTokens: showTokens,
               // origTokens: inProgress,
             ),
           );
@@ -132,12 +139,29 @@ class TokensView extends StatelessWidget {
         // No entity in progress
       }
       if (ent >= 0) {
+        if (entInProgress < 0 && inProgress.isNotEmpty) {
+            outList.add(TokensView(tokens: inProgress,
+              showTokens: showTokens));
+            inProgress = [];
+          }
         inProgress.add(text);
         typeInProgress = token['type'];
       } else {
-        outList.add(TokensView(tokens: [text]));
+        if (!text.startsWith('##')) {
+          if (inProgress.isNotEmpty) {
+            outList.add(TokensView(tokens: inProgress,
+              showTokens: showTokens));
+            inProgress = [];
+          }
+        }
+        inProgress.add(text);
       }
       entInProgress = ent;
+      print(inProgress);
+    }
+    if (inProgress.isNotEmpty) {
+      outList.add(TokensView(tokens: inProgress,
+              showTokens: showTokens));
     }
     return outList;
   }

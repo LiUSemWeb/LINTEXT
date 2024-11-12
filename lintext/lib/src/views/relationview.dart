@@ -373,7 +373,7 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
+        Wrap(
           children: [
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -400,17 +400,15 @@ class _SchemaPanelListState extends State<SchemaPanelList> {
                 'Save schema to file...',
               ),
             ),
-            Expanded(
-              child: CheckboxListTile(
-                value: validateTypes,
-                onChanged: (e) => {
-                  setState(() {
-                    validateTypes = !validateTypes;
-                  })
-                },
-                title: const Text("Validate types"),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
+            CheckboxListTile(
+              value: validateTypes,
+              onChanged: (e) => {
+                setState(() {
+                  validateTypes = !validateTypes;
+                })
+              },
+              title: const Text("Validate types"),
+              controlAffinity: ListTileControlAffinity.leading,
             ),
           ],
         ),

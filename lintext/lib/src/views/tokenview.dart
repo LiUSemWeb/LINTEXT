@@ -36,7 +36,8 @@ class TokensView extends StatelessWidget {
       this.eType,
       this.showHover = true,
       this.showTokens = false,
-      this.selectedEnt = -1});
+      this.selectedEnt = -1,
+      this.noColors = false});
   // final String text;
   // final Color innerColor;
   // final Color outlineColor;
@@ -46,13 +47,14 @@ class TokensView extends StatelessWidget {
   final String? eType;
   final bool showHover;
   final bool showTokens;
+  final bool noColors;
   // static int pos = 0;
   static final selected = HoverFeatures();
   static final Map<String, Color> typeMap = <String, Color>{};
   static final Map<int, Color> entityMap = <int, Color>{};
 
   String get text {
-    if (!showTokens) {
+    if (showTokens) {
       return tokens.join(' ');
     }
 
@@ -106,62 +108,61 @@ class TokensView extends StatelessWidget {
     }
   }
 
-  static List<Widget> fromJson(JSONObject json, {bool showTokens=false}) {
+  static List<Widget> fromJson(JSONObject json, {bool showTokens = false}) {
     // print(json);
     if (json.isEmpty || !json.containsKey('tokens')) return [];
 
     List<Widget> outList = [];
     List<String> inProgress = [];
     String typeInProgress = "";
-    int entInProgress = -1;
+    int entInProgress = -2;
     for (JSONObject token in json['tokens']) {
       String text = token['text'];
+      bool continuation = text.startsWith('##');
+
+      // if (!showTokens && continuation) { text = text.substring(2); }
       // String type = ;
       int ent = token['ent'];
 
-      // An entity in progress
-      if (entInProgress >= 0) {
-        // And we've gone one past it.
-        if (ent != entInProgress) {
-          outList.add(
-            TokensView(
-              tokens: inProgress,
-              eType: typeInProgress,
-              ent: entInProgress,
-              selectedEnt: selected.ent,
-              showTokens: showTokens,
-              // origTokens: inProgress,
-            ),
-          );
-          inProgress = [];
-          // We're still reading the entity.
-        }
-        // No entity in progress
+      // Case 1: We've already started an entity
+      // if (entInProgress >= 0) {
+      // Case 2: We finished the entity we were just working on.
+      if ((ent != entInProgress || (ent < 0 && !continuation)) && inProgress.isNotEmpty) {
+        // Add a colorful representation and then reset the progess
+        outList.add(
+          TokensView(
+            tokens: inProgress,
+            eType: typeInProgress,
+            ent: entInProgress,
+            selectedEnt: selected.ent,
+            showTokens: showTokens,
+            noColors: entInProgress < 0,
+            // origTokens: inProgress,
+          ),
+        );
+        inProgress = [];
+        // We're still reading the entity.
+      // } else if (ent < 0 && !continuation && inProgress.isNotEmpty) {
+      //   outList.add(
+      //     TokensView(
+      //       tokens: inProgress,
+      //       eType: typeInProgress,
+      //       ent: entInProgress,
+      //       selectedEnt: selected.ent,
+      //       showTokens: showTokens,
+      //       noColors: entInProgress < 0,
+      //       // origTokens: inProgress,
+      //     ),
+      //   );
+      //   inProgress = [];
       }
-      if (ent >= 0) {
-        if (entInProgress < 0 && inProgress.isNotEmpty) {
-            outList.add(TokensView(tokens: inProgress,
-              showTokens: showTokens));
-            inProgress = [];
-          }
-        inProgress.add(text);
-        typeInProgress = token['type'];
-      } else {
-        if (!text.startsWith('##')) {
-          if (inProgress.isNotEmpty) {
-            outList.add(TokensView(tokens: inProgress,
-              showTokens: showTokens));
-            inProgress = [];
-          }
-        }
-        inProgress.add(text);
-      }
+      inProgress.add(text);
+      typeInProgress = token['type'];
       entInProgress = ent;
-      print(inProgress);
     }
+    // Usually there's one more token at the end.
     if (inProgress.isNotEmpty) {
-      outList.add(TokensView(tokens: inProgress,
-              showTokens: showTokens));
+      outList.add(TokensView(tokens: inProgress, showTokens: showTokens));
     }
     return outList;
   }
@@ -191,6 +192,7 @@ class TokensView extends StatelessWidget {
 
   Color getInnerColor(int other) {
     // int other = selectedEnt;
+    if (noColors) return Colors.transparent;
     double lerp = (other < 0)
         ? 0.2
         : (ent != other)
@@ -202,6 +204,7 @@ class TokensView extends StatelessWidget {
   }
 
   Color getOutlineColor(String? other) {
+    if (noColors) return Colors.transparent;
     double lerp = (other == null)
         ? 0.2
         : (eType != other)

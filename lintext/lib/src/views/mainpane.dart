@@ -76,11 +76,14 @@ class _MainPageViewState extends State<MainPageView>
   final TextEditingController docnumController =
       TextEditingController(text: "0");
   final TextEditingController schemaController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+  int fromDoc = 1;
   DataSet? selectedDataSet = DataSet.custom;
   Schema? selectedSchema = Schema.none;
   // IconLabel? selectedIcon;
   JSONObject tokensJson = {'tokens': []};
   bool fetchSchema = true;
+  bool showTokens = false;
   List<dynamic> rankList = [];
 
   final ss = SharedState();
@@ -96,13 +99,21 @@ class _MainPageViewState extends State<MainPageView>
     schemaJson = [];
   }
 
-  Future<void> onSave() async {
+  Future<void> onSave({String? query}) async {
     // List<String> tokens = controller.text.split(' ');
     // Map<String, dynamic> tokensJson = {'tokens': []};
 
-    var body = {'method': '', 'body': {}};
+    var body = {'method': '', 'body': {}, 'schema': fetchSchema};
 
-    if (selectedDataSet == DataSet.custom) {
+    if (query != null) {
+      body['method'] = 'find';
+      body['body'] = {
+        'query': query,
+        'dataset': datasetController.text,
+        'subset': subsetController.text,
+        'docnum': fromDoc
+      };
+    } else if (selectedDataSet == DataSet.custom) {
       body['method'] = 'parse';
       body['body'] = {'text': controller.text};
       // var body = json.encode({'text': controller.text});
@@ -113,7 +124,6 @@ class _MainPageViewState extends State<MainPageView>
         'subset': subsetController.text,
         'docnum': docnumController.text
       };
-      body['schema'] = fetchSchema;
     }
     tokensJson = await sendRequestToServer(body);
     setState(() {
@@ -121,6 +131,8 @@ class _MainPageViewState extends State<MainPageView>
         if (tokensJson.containsKey('schema')) {
           schemaJson = tokensJson['schema'];
         }
+        fromDoc = tokensJson['docnum'] as int;
+        docnumController.value = TextEditingValue(text: fromDoc.toString());
         TokensView.resetColors();
         // print("schemaJson: $schemaJson");
       } catch (e) {
@@ -313,7 +325,7 @@ class _MainPageViewState extends State<MainPageView>
                         onPressed: onSave,
                         child: const Text('Fetch'),
                       ),
-                      Expanded(
+                      Flexible(
                         child: CheckboxListTile(
                           value: fetchSchema,
                           onChanged: (e) => {
@@ -323,6 +335,25 @@ class _MainPageViewState extends State<MainPageView>
                           },
                           title: const Text(
                             "Fetch Schema",
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                          dense: true,
+                          contentPadding:
+                              const EdgeInsets.only(left: 8.0, right: 0),
+                          visualDensity: const VisualDensity(
+                              horizontal: VisualDensity.minimumDensity),
+                        ),
+                      ),
+                      Flexible(
+                        child: CheckboxListTile(
+                          value: showTokens,
+                          onChanged: (e) => {
+                            setState(() {
+                              showTokens = !showTokens;
+                            })
+                          },
+                          title: const Text(
+                            "Show tokens",
                           ),
                           controlAffinity: ListTileControlAffinity.leading,
                           dense: true,
@@ -354,9 +385,73 @@ class _MainPageViewState extends State<MainPageView>
                     onPressed: onSave,
                     child: const Text('Tokenize'),
                   ),
+                ] else ...[
+                  const Divider(),
+                  Flexible(
+                    child: ExpansionTile(
+                      title: const Text(
+                        'Find Document:',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      dense: true,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                child: TextFormField(
+                                  controller: searchController,
+                                  decoration:
+                                      const InputDecoration(hintText: 'Query'),
+                                ),
+                              ),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () => onSave(query: searchController.text),
+                              child: const Text('Find...'),
+                            ),
+                          ],
+                        )
+                        // Flexible(
+                        //   child: Row(
+                        //     children: [
+                        //       Flexible(
+                        //         child: Padding(
+                        //           padding:
+                        //               const EdgeInsets.symmetric(horizontal: 24.0),
+                        //           child: Flexible(
+                        //             child: TextFormField(
+                        //               decoration:
+                        //                   const InputDecoration(hintText: 'Query'),
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       ),
+                        //       // ElevatedButton(
+                        //       //   style: ElevatedButton.styleFrom(
+                        //       //     backgroundColor: Colors.blue,
+                        //       //     foregroundColor: Colors.white,
+                        //       //   ),
+                        //       //   onPressed: onSave,
+                        //       //   child: const Text('Find...'),
+                        //       // ),
+                        //     ],
+                        //   ),
+                        // )
+                        // const VerticalDivider(thickness: 32,),
+                      ],
+                    ),
+                  ),
                 ],
                 const Divider(),
-                Wrap(children: TokensView.fromJson(tokensJson)),
+                Wrap(
+                    children: TokensView.fromJson(tokensJson,
+                        showTokens: showTokens)),
                 const Divider(),
                 const Text("Entity types"),
                 Wrap(children: TokensView.typeListWidgetFromJson(tokensJson)),

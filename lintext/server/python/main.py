@@ -27,9 +27,11 @@ from typing import Dict, Any
 
 from transformers import AutoTokenizer
 
-__def_model = 'bert-large-uncased'
+__def_model = 'bert-large-cased'
 # __def_model = 'dmis-lab/biobert-large-cased-v1.1'
 # __def_model = 'Charangan/MedBERT'
+
+__doc_num = 0
 
 
 class CustomJSONResponse(JSONResponse):
@@ -92,11 +94,12 @@ async def respond_post(data: Request) -> Dict[str, Any]:
         in_json = await data.json()
         method = in_json['method']
         body = in_json['body']
-        if method == 'fetch':
+        if method == 'fetch' or method == 'find':
             out_json['tokens'].extend(getDocument(**body))
             print('Fetch schema?', in_json['schema'])
             if in_json['schema']:
                 out_json['schema'] = getRelInfo(body['dataset'].lower())
+                out_json['docnum'] = __doc_num
         elif method == 'parse':
             tokenized = await asyncio.create_task(tokenize(body['text']))
             print(tokenized)
@@ -125,15 +128,38 @@ def getEntity(ment, masked_doc):
                 return e
     return -1
 
-def getDocument(dataset, subset, docnum, model='', num_blanks=0, **kwargs):
+def getDocument(dataset, subset, docnum, model='', num_blanks=0, query=None, **kwargs):
+    global __doc_num
+    __doc_num = int(docnum)
     # read_document(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path='data', use_ent=use_ent)
     mlm = getBERT(model) if model else getBERT()
     mlm.extend_bert(50, 1)
-    d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=num_blanks, use_ent=False, mlm=mlm))
-
-    for a, b in zip(d.masked_doc['tokens'], d.masked_doc['ments']):
-        yield {'text': a, 'type':d.mention_types[b] if b >= 0 else '', 'ent': getEntity(b, d.masked_doc), 'ment': b}
+    if query:
+        docnum = findDocument(query, int(docnum), -1, dataset.lower(), subset.lower(), mlm)
+        # docnum = 2
+        if docnum == -1:
+            yield from []
+    if int(docnum) > -1:
+        d = next(Document.read(task_name=dataset.lower(), dset=subset, doc=int(docnum), path=data_path, num_blanks=num_blanks, use_ent=False, mlm=mlm))
+        for a, b in zip(d.masked_doc['tokens'], d.masked_doc['ments']):
+            yield {'text': a, 'type':d.mention_types[b] if b >= 0 else '', 'ent': getEntity(b, d.masked_doc), 'ment': b}
     # print(d.masked_doc)
+
+def findDocument(query, startAt, endAt, dataset, subset, mlm):
+    for doc in Document.read(task_name=dataset, dset=subset, doc=-1, path=data_path, num_blanks=0, use_ent=False, mlm=mlm):
+        # return 3
+        if doc.num > startAt:
+            if endAt == -1 or doc.num <= endAt:
+                # doc.text().lower()
+                # return doc.num
+                if query in doc.text().lower():
+                    global __doc_num
+                    __doc_num = doc.num
+                    return doc.num
+    if endAt == -1:
+        return findDocument(query=query, startAt=endAt, endAt=startAt, dataset=dataset, subset=subset, mlm=mlm)
+    else:
+        return -1
 
 def getRelInfo(dataset):
     with open(f'{data_path}/{dataset}/rel_info_full.json', 'r') as rel_info_file:

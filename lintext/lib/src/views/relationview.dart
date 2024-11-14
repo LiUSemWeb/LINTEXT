@@ -181,8 +181,9 @@ class _SchemaItemState extends State<SchemaItem> {
             labelStyle: ts),
         // initialValue: widget.json[key].join(', '),
         controller: controllers[key],
-        onFieldSubmitted: (value) => {widget.json[key] = value},
+        onFieldSubmitted: (value) => {widget.json[key] = value.split(', ?')},
         validator: validateTypeList,
+        autovalidateMode: AutovalidateMode.onUnfocus,
         // autofillHints: widget.typeHints,
         // auto
       ));

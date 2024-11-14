@@ -169,7 +169,7 @@ class _AnalyzeViewState extends State<AnalyzeView> {
                   // trigger focus request on the text field and virtual keyboard will appear
                   // afterward. On desktop platforms however, this defaults to true.
                   requestFocusOnTap: true,
-                  label: const Text('Choose data set'),
+                  label: const Text('Ranking metric'),
                   // onSelected: (Scorer? dset) {
                   //   setState(() {
                   //     widget.settings["scorer"] = dset;

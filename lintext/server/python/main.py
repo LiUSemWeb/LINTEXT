@@ -188,7 +188,9 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
             # print('after')
             fb = getBERT(model)
             if fb:
-                res = run_many_experiments(task_name=dataset.lower(), dset=subset.lower(), rel_info=schema, nonlin=nonlin,
+                task_name=dataset.lower()
+                dset=subset.lower()
+                res = run_many_experiments(task_name=task_name, dset=dset, rel_info=schema, nonlin=nonlin,
                                     pooler=pooler, scorers=[KNOWN_METHODS[scorer]], num_blanks=num_blanks, num_passes=num_passes+1, docnum=doc,
                                     max_batch=1000, model=fb, data_path=data_path, use_ent=False)
                 # print(res.keys())
@@ -203,8 +205,11 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                     # tensor([16736,  1011, 14447, 14671]), True, -12.33619499206543)
                     lis_b.extend(res[rel][scorer])
                 lis_c = []
+                document = next(Document.read(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path=data_path, use_ent=False))
                 for r in sorted(lis_b, key=lambda x: -x[-2]):
                     e1, e2, m1, m2, i1, i2, truth, tokens, score, allscores = r
+                    if document.mention_types[m1] not in schema[rel]['domain'] or document.mention_types[m2] not in schema[rel]['range']:
+                        continue
                     if (e1, e2) not in seen:
                         # t1 = fb.tokenizer.convert_ids_to_tokens(i1)
                         if num_blanks == 1:
@@ -218,7 +223,7 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                         # t2 = fb.tokenizer.convert_ids_to_tokens(i2)
                         statement = " ".join(fb.tokenizer.convert_ids_to_tokens([1 if t == -1 else t for t in tokens_2]))
                         # statement = schema[rel]['prompt_xy'].replace('?x', fb.tokenizer.convert_tokens_to_string(t1)).replace('?y', fb.tokenizer.convert_tokens_to_string(t2))
-                        # seen.add((e1, e2))
+                        seen.add((e1, e2))
                         lis_c.append([e1, e2, m1, m2, statement, truth, allscores, score])
                 return lis_c
             else:

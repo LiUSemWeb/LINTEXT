@@ -1,7 +1,7 @@
 String port = '13679';
 String serverUrl = 'http://localhost';
 
-String defaultModel = 'bert-large-uncased';
+String defaultModel = 'bert-large-cased';
 
 typedef SettingsMemory = Map<String, Object>;
 SettingsMemory newDefaultSettingsMemory() {

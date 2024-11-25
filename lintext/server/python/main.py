@@ -208,7 +208,8 @@ def analyze(text='', schema={}, dataset='', doc=-1, subset='', model=__def_model
                 document = next(Document.read(task_name=task_name, dset=dset, doc=doc, num_blanks=num_blanks, mlm=fb, path=data_path, use_ent=False))
                 for r in sorted(lis_b, key=lambda x: -x[-2]):
                     e1, e2, m1, m2, i1, i2, truth, tokens, score, allscores = r
-                    if document.mention_types[m1] not in schema[rel]['domain'] or document.mention_types[m2] not in schema[rel]['range']:
+                    if ((len(schema[rel]['domain']) > 0) and document.mention_types[m1] not in schema[rel]['domain']) \
+                    or ((len(schema[rel]['range']) > 0) and document.mention_types[m2] not in schema[rel]['range']):
                         continue
                     if (e1, e2) not in seen:
                         # t1 = fb.tokenizer.convert_ids_to_tokens(i1)

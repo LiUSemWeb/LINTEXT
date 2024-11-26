@@ -233,283 +233,286 @@ class _MainPageViewState extends State<MainPageView>
         ),
       ),
       floatingActionButton: getFAB(),
-      body: Row(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    DropdownMenu<DataSet>(
-                      initialSelection: selectedDataSet,
-                      controller: datasetController,
-                      // requestFocusOnTap is enabled/disabled by platforms when it is null.
-                      // On mobile platforms, this is false by default. Setting this to true will
-                      // trigger focus request on the text field and virtual keyboard will appear
-                      // afterward. On desktop platforms however, this defaults to true.
-                      requestFocusOnTap: true,
-                      label: const Text('Choose data set'),
-                      onSelected: (DataSet? dset) {
-                        setState(() {
-                          selectedDataSet = dset;
-                        });
-                      },
-                      dropdownMenuEntries: DataSet.values
-                          .map<DropdownMenuEntry<DataSet>>((DataSet dset) {
-                        return DropdownMenuEntry<DataSet>(
-                          value: dset,
-                          label: dset.label,
-                        );
-                      }).toList(),
-                    ),
-                    if (selectedDataSet != DataSet.custom) ...[
-                      const SizedBox(width: 24),
-                      DropdownMenu<String>(
-                        initialSelection: selectedDataSet?.sets[0],
-                        controller: subsetController,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      DropdownMenu<DataSet>(
+                        initialSelection: selectedDataSet,
+                        controller: datasetController,
                         // requestFocusOnTap is enabled/disabled by platforms when it is null.
                         // On mobile platforms, this is false by default. Setting this to true will
                         // trigger focus request on the text field and virtual keyboard will appear
                         // afterward. On desktop platforms however, this defaults to true.
                         requestFocusOnTap: true,
-                        // label: const Text('Choose data set'),
-                        onSelected: (String? dset) {
-                          // setState(() {
-                          //   selectedDataSet = dset;
-                          // });
+                        label: const Text('Choose data set'),
+                        onSelected: (DataSet? dset) {
+                          setState(() {
+                            selectedDataSet = dset;
+                          });
                         },
-                        dropdownMenuEntries: selectedDataSet!.sets
-                            .map<DropdownMenuEntry<String>>((String dset) {
-                          return DropdownMenuEntry<String>(
+                        dropdownMenuEntries: DataSet.values
+                            .map<DropdownMenuEntry<DataSet>>((DataSet dset) {
+                          return DropdownMenuEntry<DataSet>(
                             value: dset,
-                            label: dset,
+                            label: dset.label,
                           );
                         }).toList(),
                       ),
-                      const SizedBox(width: 24),
-                      SizedBox(
-                        width: 60,
-                        child: Focus(
-                          onFocusChange: (hasFocus) => {
-                            if (!hasFocus && docnumController.text.isEmpty)
-                              docnumController.text = "0"
+                      if (selectedDataSet != DataSet.custom) ...[
+                        const SizedBox(width: 24),
+                        DropdownMenu<String>(
+                          initialSelection: selectedDataSet?.sets[0],
+                          controller: subsetController,
+                          // requestFocusOnTap is enabled/disabled by platforms when it is null.
+                          // On mobile platforms, this is false by default. Setting this to true will
+                          // trigger focus request on the text field and virtual keyboard will appear
+                          // afterward. On desktop platforms however, this defaults to true.
+                          requestFocusOnTap: true,
+                          // label: const Text('Choose data set'),
+                          onSelected: (String? dset) {
+                            // setState(() {
+                            //   selectedDataSet = dset;
+                            // });
                           },
-                          canRequestFocus: false,
-                          child: TextFormField(
-                            maxLines: 1,
-                            maxLength: 6,
-                            controller: docnumController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onChanged: (value) => {
-                              if (value.isNotEmpty)
-                                docnumController.text =
-                                    int.parse(value).toString()
+                          dropdownMenuEntries: selectedDataSet!.sets
+                              .map<DropdownMenuEntry<String>>((String dset) {
+                            return DropdownMenuEntry<String>(
+                              value: dset,
+                              label: dset,
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(width: 24),
+                        SizedBox(
+                          width: 60,
+                          child: Focus(
+                            onFocusChange: (hasFocus) => {
+                              if (!hasFocus && docnumController.text.isEmpty)
+                                docnumController.text = "0"
                             },
-                            decoration: const InputDecoration(
-                              labelText: "Doc #",
+                            canRequestFocus: false,
+                            child: TextFormField(
+                              maxLines: 1,
+                              maxLength: 6,
+                              controller: docnumController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              onChanged: (value) => {
+                                if (value.isNotEmpty)
+                                  docnumController.text =
+                                      int.parse(value).toString()
+                              },
+                              decoration: const InputDecoration(
+                                labelText: "Doc #",
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(
-                        width: 24,
-                      ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
+                        const SizedBox(
+                          width: 24,
                         ),
-                        onPressed: onSave,
-                        child: const Text('Fetch'),
-                      ),
-                      Flexible(
-                        child: CheckboxListTile(
-                          value: fetchSchema,
-                          onChanged: (e) => {
-                            setState(() {
-                              fetchSchema = !fetchSchema;
-                            })
-                          },
-                          title: const Text(
-                            "Fetch Schema",
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
                           ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                          contentPadding:
-                              const EdgeInsets.only(left: 8.0, right: 0),
-                          visualDensity: const VisualDensity(
-                              horizontal: VisualDensity.minimumDensity),
+                          onPressed: onSave,
+                          child: const Text('Fetch'),
                         ),
-                      ),
-                      Flexible(
-                        child: CheckboxListTile(
-                          value: showTokens,
-                          onChanged: (e) => {
-                            setState(() {
-                              showTokens = !showTokens;
-                            })
-                          },
-                          title: const Text(
-                            "Show tokens",
+                        Flexible(
+                          child: CheckboxListTile(
+                            value: fetchSchema,
+                            onChanged: (e) => {
+                              setState(() {
+                                fetchSchema = !fetchSchema;
+                              })
+                            },
+                            title: const Text(
+                              "Fetch Schema",
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            dense: true,
+                            contentPadding:
+                                const EdgeInsets.only(left: 8.0, right: 0),
+                            visualDensity: const VisualDensity(
+                                horizontal: VisualDensity.minimumDensity),
                           ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                          contentPadding:
-                              const EdgeInsets.only(left: 8.0, right: 0),
-                          visualDensity: const VisualDensity(
-                              horizontal: VisualDensity.minimumDensity),
                         ),
+                        Flexible(
+                          child: CheckboxListTile(
+                            value: showTokens,
+                            onChanged: (e) => {
+                              setState(() {
+                                showTokens = !showTokens;
+                              })
+                            },
+                            title: const Text(
+                              "Show tokens",
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            dense: true,
+                            contentPadding:
+                                const EdgeInsets.only(left: 8.0, right: 0),
+                            visualDensity: const VisualDensity(
+                                horizontal: VisualDensity.minimumDensity),
+                          ),
+                        ),
+                      ] else
+                        ...[]
+                      // Container()
+                      // Text('Usghfds')
+                      // else Container(),
+                    ],
+                  ),
+                  if (selectedDataSet == DataSet.custom) ...[
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'Text to process',
+                        labelText: 'Text:',
                       ),
-                    ] else
-                      ...[]
-                    // Container()
-                    // Text('Usghfds')
-                    // else Container(),
-                  ],
-                ),
-                if (selectedDataSet == DataSet.custom) ...[
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'Text to process',
-                      labelText: 'Text:',
+                      autofocus: false,
+                      controller: controller,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
                     ),
-                    autofocus: false,
-                    controller: controller,
-                    maxLines: null,
-                    keyboardType: TextInputType.text,
-                  ),
-                  TextButton(
-                    onPressed: onSave,
-                    child: const Text('Tokenize'),
-                  ),
-                ] else ...[
-                  const Divider(),
-                  Flexible(
-                    child: ExpansionTile(
-                      title: const Text(
-                        'Find Document:',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      dense: true,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                child: TextFormField(
-                                  controller: searchController,
-                                  decoration:
-                                      const InputDecoration(hintText: 'Query'),
+                    TextButton(
+                      onPressed: onSave,
+                      child: const Text('Tokenize'),
+                    ),
+                  ] else ...[
+                    const Divider(),
+                    Flexible(
+                      child: ExpansionTile(
+                        title: const Text(
+                          'Find Document:',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        dense: true,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                  child: TextFormField(
+                                    controller: searchController,
+                                    decoration:
+                                        const InputDecoration(hintText: 'Query'),
+                                  ),
                                 ),
                               ),
-                            ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                ),
+                                onPressed: () => onSave(query: searchController.text),
+                                child: const Text('Find...'),
                               ),
-                              onPressed: () => onSave(query: searchController.text),
-                              child: const Text('Find...'),
-                            ),
-                          ],
-                        )
-                        // Flexible(
-                        //   child: Row(
-                        //     children: [
-                        //       Flexible(
-                        //         child: Padding(
-                        //           padding:
-                        //               const EdgeInsets.symmetric(horizontal: 24.0),
-                        //           child: Flexible(
-                        //             child: TextFormField(
-                        //               decoration:
-                        //                   const InputDecoration(hintText: 'Query'),
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       ),
-                        //       // ElevatedButton(
-                        //       //   style: ElevatedButton.styleFrom(
-                        //       //     backgroundColor: Colors.blue,
-                        //       //     foregroundColor: Colors.white,
-                        //       //   ),
-                        //       //   onPressed: onSave,
-                        //       //   child: const Text('Find...'),
-                        //       // ),
-                        //     ],
-                        //   ),
-                        // )
-                        // const VerticalDivider(thickness: 32,),
+                            ],
+                          )
+                          // Flexible(
+                          //   child: Row(
+                          //     children: [
+                          //       Flexible(
+                          //         child: Padding(
+                          //           padding:
+                          //               const EdgeInsets.symmetric(horizontal: 24.0),
+                          //           child: Flexible(
+                          //             child: TextFormField(
+                          //               decoration:
+                          //                   const InputDecoration(hintText: 'Query'),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //       ),
+                          //       // ElevatedButton(
+                          //       //   style: ElevatedButton.styleFrom(
+                          //       //     backgroundColor: Colors.blue,
+                          //       //     foregroundColor: Colors.white,
+                          //       //   ),
+                          //       //   onPressed: onSave,
+                          //       //   child: const Text('Find...'),
+                          //       // ),
+                          //     ],
+                          //   ),
+                          // )
+                          // const VerticalDivider(thickness: 32,),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const Divider(),
+                  Wrap(
+                      children: TokensView.fromJson(tokensJson,
+                          showTokens: showTokens)),
+                  const Divider(),
+                  const Text("Entity types"),
+                  Wrap(children: TokensView.typeListWidgetFromJson(tokensJson)),
+                ],
+              ),
+            ),
+            const VerticalDivider(),
+            // DefaultTabController(
+            //     length: 2,
+            //     child: TabBar(tabs: [Tab(text: "Schema"), Tab(text: "Analyze")])),
+        
+            Expanded(
+              child: Column(
+                children: [
+                  // TabBar(
+                  //   controller: tc,
+                  //   tabs: [Tab(text: "Schema"), Tab(text: "Analyze")],
+                  // ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: tc,
+                      children: [
+                        SchemaPanelList(
+                          schemaJson: schemaJson,
+                          typeHints: TokensView.typeListFromJson(tokensJson),
+                          onNewSchema: (JSONList newSchema) => {
+                            setState(() {
+                              schemaJson = newSchema;
+                            })
+                          },
+                        ),
+                        AnalyzeView(
+                          callback: (
+                                  {required Map<String, Object> analyzeParams}) =>
+                              doAnalyze(
+                                  schema: schemaJson,
+                                  analyzeParams: analyzeParams),
+                          rankList: rankList,
+                          schemaJson: schemaJson,
+                          settings: widget.settings,
+                        ),
+                        // Text('Emptier')
                       ],
                     ),
                   ),
                 ],
-                const Divider(),
-                Wrap(
-                    children: TokensView.fromJson(tokensJson,
-                        showTokens: showTokens)),
-                const Divider(),
-                const Text("Entity types"),
-                Wrap(children: TokensView.typeListWidgetFromJson(tokensJson)),
-              ],
+              ),
             ),
-          ),
-          const VerticalDivider(),
-          // DefaultTabController(
-          //     length: 2,
-          //     child: TabBar(tabs: [Tab(text: "Schema"), Tab(text: "Analyze")])),
-
-          Expanded(
-            child: Column(
-              children: [
-                // TabBar(
-                //   controller: tc,
-                //   tabs: [Tab(text: "Schema"), Tab(text: "Analyze")],
-                // ),
-                Expanded(
-                  child: TabBarView(
-                    controller: tc,
-                    children: [
-                      SchemaPanelList(
-                        schemaJson: schemaJson,
-                        typeHints: TokensView.typeListFromJson(tokensJson),
-                        onNewSchema: (JSONList newSchema) => {
-                          setState(() {
-                            schemaJson = newSchema;
-                          })
-                        },
-                      ),
-                      AnalyzeView(
-                        callback: (
-                                {required Map<String, Object> analyzeParams}) =>
-                            doAnalyze(
-                                schema: schemaJson,
-                                analyzeParams: analyzeParams),
-                        rankList: rankList,
-                        schemaJson: schemaJson,
-                        settings: widget.settings,
-                      ),
-                      // Text('Emptier')
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // SchemaPanelList(
-          //   schemaJson: schemaJson,
-          //   typeHints: TokensView.typeListFromJson(tokensJson),
-          //   onNewSchema: (JSONList newSchema) => {
-          //     setState(() {
-          //       schemaJson = newSchema;
-          //     })
-          //   },
-          // ),
-        ],
+            // SchemaPanelList(
+            //   schemaJson: schemaJson,
+            //   typeHints: TokensView.typeListFromJson(tokensJson),
+            //   onNewSchema: (JSONList newSchema) => {
+            //     setState(() {
+            //       schemaJson = newSchema;
+            //     })
+            //   },
+            // ),
+          ],
+        ),
       ),
       // ),
     );

@@ -143,7 +143,7 @@ class _AnalyzeViewState extends State<AnalyzeView> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: SizedBox(
-                    width: 180,
+                    width: 400,
                     child: Focus(
                       onFocusChange: (hasFocus) => {
                         if (!hasFocus && controllers['model']!.text.isEmpty)

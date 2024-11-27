@@ -131,8 +131,10 @@ class _MainPageViewState extends State<MainPageView>
         if (tokensJson.containsKey('schema')) {
           schemaJson = tokensJson['schema'];
         }
-        fromDoc = tokensJson['docnum'] as int;
-        docnumController.value = TextEditingValue(text: fromDoc.toString());
+        if(tokensJson.containsKey('docnum')) {
+          fromDoc = tokensJson['docnum'] as int;
+          docnumController.value = TextEditingValue(text: fromDoc.toString());
+        }
         TokensView.resetColors();
         // print("schemaJson: $schemaJson");
       } catch (e) {

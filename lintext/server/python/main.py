@@ -1,4 +1,3 @@
-
 import asyncio
 import os
 from pathlib import Path
@@ -24,6 +23,8 @@ from lib.util import run_many_experiments
 from huggingface_hub import repo_exists
 
 from typing import Dict, Any
+
+import spacy
 
 from transformers import AutoTokenizer
 
@@ -101,11 +102,30 @@ async def respond_post(data: Request) -> Dict[str, Any]:
                 out_json['schema'] = getRelInfo(body['dataset'].lower())
                 out_json['docnum'] = __doc_num
         elif method == 'parse':
-            tokenized = await asyncio.create_task(tokenize(body['text']))
-            print(tokenized)
-            for token in tokenized:
-                i = random.randint(-3, 2)
-                out_json['tokens'].append({'text': token, 'type': str(i) if i >= 0 else '', 'ent': i, 'ment': i})
+            try:
+                nlp = spacy.load("en_core_web_lg")
+                tokenized = nlp(body['text'])
+                ents = dict()
+                for i, ent in enumerate(tokenized.ents):
+                    for e in range(ent.start, ent.end):
+                        ents[e] = (i, ent.label_)
+
+                # output = []
+                for i, token in enumerate(tokenized):
+                    if i in ents:
+                        en = ents[i][0]
+                        ty = ents[i][1]
+                    else:
+                        en = -1
+                        ty = '' 
+                    out_json['tokens'].append({'text': token.text, 'type': ty, 'ent': en, 'ment': en})
+                # out_json['tokens'].append({'text': '?????', 'type': 'ERROR', 'ent': -1, 'ment': -1})
+                # print(tokenized)
+                # for token in tokenized:
+                #     i = random.randint(-3, 2)
+                #     out_json['tokens'].append({'text': token, 'type': str(i) if i >= 0 else '', 'ent': i, 'ment': i})
+            except BaseException as e:
+                out_json['tokens'] = [{'text': f'Server error: {e}', 'type': 'ERROR', 'ent': 0, 'ment': 0}]
         elif method == 'analyze':
 
             out_json['results'] = analyze(**body)
